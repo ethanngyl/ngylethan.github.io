@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Ethan's Portfolio</title>
+<meta name="description" content="Ethan — computer science student at DigiPen Singapore building game engines, renderers and tools.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: engine-viewport hero (name left, live splat render right), then a ruled work index like a scene outliner */
+:root {
+  --bg: #f2f4f8;
+  --panel: #e7ebf2;
+  --ink: #0f1522;
+  --muted: #566077;
+  --line: #cfd6e3;
+  --accent: #2f55e6;
+  --warm: #d98a1f;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --canvas-bg: #0b0f18;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b0f18; --panel: #121827; --ink: #e5e9f2; --muted: #8e98ae;
+    --line: #242d40; --accent: #7f9cff; --warm: #f0ad4a; --canvas-bg: #070a11;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b0f18; --panel: #121827; --ink: #e5e9f2; --muted: #8e98ae;
+  --line: #242d40; --accent: #7f9cff; --warm: #f0ad4a; --canvas-bg: #070a11;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--body); font-size: 16px; line-height: 1.6;
+  padding-inline: 20px; padding-block: 0;
+}
+.wrap { max-width: 1080px; margin-inline: auto; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+.mono { font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.02em; }
+.label { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+
+/* top bar */
+header.top {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+  padding-block: 20px; border-bottom: 1px solid var(--line);
+}
+header.top nav { display: flex; gap: 20px; flex-wrap: wrap; }
+header.top nav a { color: var(--muted); text-decoration: none; font-family: var(--mono); font-size: 0.8rem; }
+header.top nav a:hover { color: var(--ink); }
+.status { display: inline-flex; align-items: center; gap: 8px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--warm); box-shadow: 0 0 0 3px color-mix(in srgb, var(--warm) 25%, transparent); }
+
+/* hero */
+.hero {
+  display: grid; grid-template-columns: 1.05fr 1fr; gap: 40px; align-items: center;
+  padding-block: 56px 48px;
+}
+.hero > * { min-width: 0; }
+h1 {
+  font-family: var(--display); font-weight: 800; font-size: clamp(3rem, 8vw, 5.6rem);
+  line-height: 0.92; letter-spacing: -0.035em; margin: 12px 0 20px; text-wrap: balance;
+}
+h1 span { color: var(--accent); }
+.lede { font-size: 1.15rem; color: var(--muted); max-width: 34ch; margin: 0 0 28px; }
+.lede strong { color: var(--ink); font-weight: 500; }
+.cta { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn {
+  font-family: var(--mono); font-size: 0.82rem; padding: 11px 16px; border-radius: 6px;
+  text-decoration: none; border: 1px solid var(--line); color: var(--ink); background: transparent; cursor: pointer;
+}
+.btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.btn:hover { border-color: var(--accent); }
+
+.viewport {
+  position: relative; background: var(--canvas-bg); border-radius: 10px; overflow: hidden;
+  aspect-ratio: 4 / 3.4; max-width: 100%; border: 1px solid var(--line); cursor: grab;
+}
+.viewport:active { cursor: grabbing; }
+.viewport canvas { display: block; width: 100%; height: 100%; }
+.hud {
+  position: absolute; inset: 12px 14px auto 14px; display: flex; justify-content: space-between;
+  font-family: var(--mono); font-size: 0.7rem; color: #8fa0c4; pointer-events: none; gap: 12px;
+}
+.hud b { color: #dfe6f7; font-weight: 500; }
+.hud-bottom { inset: auto 14px 12px 14px; }
+
+/* sections */
+section { padding-block: 56px; border-top: 1px solid var(--line); }
+.sec-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 28px; }
+h2 { font-family: var(--display); font-weight: 600; font-size: clamp(1.8rem, 4vw, 2.4rem); letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+h3 { font-family: var(--display); font-weight: 600; font-size: 1.35rem; letter-spacing: -0.01em; margin: 0 0 6px; }
+
+/* now / featured */
+.feature {
+  display: grid; grid-template-columns: 1.3fr 1fr; gap: 32px;
+  background: var(--panel); border-radius: 12px; padding: 32px;
+}
+.feature > * { min-width: 0; }
+.feature p { margin: 0 0 14px; max-width: 60ch; }
+.pipeline { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; counter-reset: stage; }
+.pipeline li {
+  display: grid; grid-template-columns: 28px 1fr; gap: 12px; align-items: start;
+  padding-bottom: 10px; border-bottom: 1px dashed var(--line); font-size: 0.95rem;
+}
+.pipeline li:last-child { border-bottom: 0; }
+.pipeline li::before {
+  counter-increment: stage; content: counter(stage);
+  font-family: var(--mono); font-size: 0.75rem; color: var(--accent);
+  border: 1px solid var(--accent); border-radius: 50%; width: 24px; height: 24px;
+  display: grid; place-items: center;
+}
+.pipeline small { display: block; color: var(--muted); font-size: 0.82rem; }
+
+/* work index */
+.work { list-style: none; margin: 0; padding: 0; }
+.work li {
+  display: grid; grid-template-columns: 90px 1fr 230px; gap: 24px;
+  padding-block: 26px; border-top: 1px solid var(--line);
+}
+.work li:first-child { border-top: 0; padding-top: 0; }
+.work li > * { min-width: 0; }
+.work .year { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); padding-top: 6px; }
+.work p { margin: 0; color: var(--muted); max-width: 62ch; }
+.work .role { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); margin-bottom: 6px; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; align-content: start; padding-top: 4px; }
+.tag { font-family: var(--mono); font-size: 0.7rem; padding: 3px 8px; border: 1px solid var(--line); border-radius: 4px; color: var(--muted); }
+.stat { color: var(--ink); font-weight: 500; }
+
+/* skills */
+.skills { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; }
+.skills > div { min-width: 0; }
+.skills ul { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 6px; font-size: 0.95rem; }
+
+/* about */
+.about { display: grid; grid-template-columns: 1fr 1.4fr; gap: 40px; }
+.about > * { min-width: 0; }
+.about p { margin: 0 0 14px; max-width: 62ch; }
+.facts { display: grid; gap: 14px; margin: 0; }
+.facts div { display: grid; grid-template-columns: 110px 1fr; gap: 12px; }
+.facts dt { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; padding-top: 3px; }
+.facts dd { margin: 0; }
+
+/* contact */
+.contact h2 { font-size: clamp(2.2rem, 6vw, 3.6rem); font-weight: 800; letter-spacing: -0.03em; max-width: 16ch; }
+.email-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+.email { font-family: var(--mono); font-size: 1.05rem; user-select: all; padding: 10px 14px; background: var(--panel); border-radius: 6px; overflow-wrap: anywhere; }
+.links { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px; }
+.links:empty { display: none; }
+footer { padding-block: 28px 40px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; color: var(--muted); }
+
+@media (max-width: 860px) {
+  .hero, .feature, .about { grid-template-columns: 1fr; }
+  .work li { grid-template-columns: 1fr; gap: 8px; }
+  .work .year { padding-top: 0; }
+  .skills { grid-template-columns: repeat(2, 1fr); }
+  .feature { padding: 22px; }
+}
+@media (max-width: 480px) {
+  .skills { grid-template-columns: 1fr; }
+  .facts div { grid-template-columns: 1fr; gap: 2px; }
+}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <span class="status mono"><span class="dot" aria-hidden="true"></span>Open to internships</span>
+    <nav aria-label="Sections">
+      <a href="#now">Now</a>
+      <a href="#work">Work</a>
+      <a href="#skills">Skills</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <div>
+      <div class="label">Engine · Graphics · Tools</div>
+      <h1>Ethan<span>.</span><br>I build the layer under the game.</h1>
+      <p class="lede">Computer Science student at <strong>DigiPen Institute of Technology Singapore</strong>, specialising in Interactive Media and Game Design. I lead teams that ship custom engines, renderers and the tools people use to build on them.</p>
+      <div class="cta">
+        <a class="btn primary" href="#work">See the work</a>
+        <a class="btn" href="#contact">Get in touch</a>
+      </div>
+    </div>
+    <div class="viewport" id="viewport" aria-label="Interactive point-cloud render. Drag to rotate." role="img">
+      <canvas id="splat"></canvas>
+      <div class="hud"><span>viewport · <b>point cloud</b></span><span><b id="pts">0</b> pts</span></div>
+      <div class="hud hud-bottom"><span>drag to orbit</span><span><b id="ft">0.0</b> ms/frame</span></div>
+    </div>
+  </div>
+
+  <section id="now">
+    <div class="sec-head">
+      <h2>Right now</h2>
+      <span class="label">Final year project · 6 months · team of 7</span>
+    </div>
+    <div class="feature">
+      <div>
+        <div class="role mono" style="color:var(--accent);margin-bottom:8px">Team lead · API &amp; integration · engine sandbox</div>
+        <h3>3D object scanner</h3>
+        <p>Walk around an object with your phone, and get a navigable 3D model back. Photos go to a server-side reconstruction pipeline built on COLMAP and Gaussian Splatting, and the result renders in our own engine instead of an off-the-shelf viewer.</p>
+        <p>I lead five CS students and two UX designers, own the API that ties the mobile capture app to the reconstruction backend, and build the engine sandbox and visualiser the splats land in.</p>
+        <div class="tags" style="margin-top:16px">
+          <span class="tag">COLMAP</span><span class="tag">Gaussian Splatting</span><span class="tag">.ply</span><span class="tag">C++</span><span class="tag">REST API</span><span class="tag">Mobile</span>
+        </div>
+      </div>
+      <ol class="pipeline" aria-label="Scanner pipeline">
+        <li><div>Capture<small>Mobile app guides photos from many angles</small></div></li>
+        <li><div>Ingest<small>Upload service queues the image set</small></div></li>
+        <li><div>Reconstruct<small>COLMAP camera poses, then Gaussian Splatting</small></div></li>
+        <li><div>Render<small>Custom engine draws the splats and .ply point clouds</small></div></li>
+        <li><div>Inspect<small>Sandbox UI to orbit, crop and compare scans</small></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="work">
+    <div class="sec-head">
+      <h2>Selected work</h2>
+      <span class="label">Engines · AI · Design</span>
+    </div>
+    <ul class="work">
+      <li>
+        <div class="year">Multi-year</div>
+        <div>
+          <div class="role">Tech lead · StructSquad</div>
+          <h3>StructSquad Engine</h3>
+          <p>A custom C++ / OpenGL game engine built on an entity-component-system core. Its second-generation graphics system handles instanced rendering, materials and framebuffers. Around it: FMOD audio, collision, input, Lua gameplay scripting, and an ImGui level editor the team builds levels in. I also own a lot of the unglamorous parts: CMake configuration, cross-platform dependencies, and the Git workflow.</p>
+        </div>
+        <div class="tags"><span class="tag">C++</span><span class="tag">OpenGL</span><span class="tag">ECS</span><span class="tag">FMOD</span><span class="tag">Lua</span><span class="tag">ImGui</span><span class="tag">CMake</span></div>
+      </li>
+      <li>
+        <div class="year">2026</div>
+        <div>
+          <div class="role">Game AI · CS380</div>
+          <h3>Pathfinding &amp; behaviour trees</h3>
+          <p>A* pathfinding with rubber-banding and Catmull-Rom smoothing that passes <span class="stat">all 8,000 grading tests</span>. Terrain analysis with influence and visibility maps. A behaviour-tree framework built on CRTP, with 10 custom nodes driving 4 distinct creatures, including a shy mimic chest and a hunter.</p>
+        </div>
+        <div class="tags"><span class="tag">C++</span><span class="tag">A*</span><span class="tag">Influence maps</span><span class="tag">Behaviour trees</span><span class="tag">CRTP</span></div>
+      </li>
+      <li>
+        <div class="year">2026</div>
+        <div>
+          <div class="role">Level design</div>
+          <h3>World-first level design</h3>
+          <p>A design practice that starts from the world and lets the level follow from it. Developed across One Million Quest, an escape room, Work from Home and 4Koma, and written up as a design-intent portfolio.</p>
+        </div>
+        <div class="tags"><span class="tag">Level design</span><span class="tag">Systems design</span></div>
+      </li>
+    </ul>
+  </section>
+
+  <section id="skills">
+    <div class="sec-head"><h2>Toolbox</h2></div>
+    <div class="skills">
+      <div><div class="label">Engine &amp; graphics</div><ul><li>C++17</li><li>OpenGL</li><li>ECS architecture</li><li>Instanced rendering</li><li>Point clouds &amp; splats</li></ul></div>
+      <div><div class="label">Gameplay &amp; AI</div><ul><li>A* &amp; path smoothing</li><li>Behaviour trees</li><li>Influence maps</li><li>Lua scripting</li><li>Level design</li></ul></div>
+      <div><div class="label">Tools &amp; build</div><ul><li>ImGui editors</li><li>CMake</li><li>Git workflows</li><li>FMOD</li><li>Azure</li></ul></div>
+      <div><div class="label">Product &amp; web</div><ul><li>Python</li><li>REST APIs</li><li>LLM integration</li><li>Product management</li></ul></div>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="about">
+      <div>
+        <h2>About</h2>
+      </div>
+      <div>
+        <p>I'm a Singaporean CS student who likes the systems nobody sees: render loops, build scripts, the API between the phone and the server. I've been the tech lead on my team's projects, and I've also worked as a design lead and as a product manager, so I'm comfortable moving between the code and the people deciding what it should do.</p>
+        <p>After graduating I want to work abroad in engine, graphics or tools programming.</p>
+        <dl class="facts">
+          <div><dt>School</dt><dd>DigiPen Institute of Technology Singapore</dd></div>
+          <div><dt>Degree</dt><dd>BS Computer Science, Interactive Media &amp; Game Design</dd></div>
+          <div><dt>Roles</dt><dd>Tech lead · Design lead · Product manager</dd></div>
+          <div><dt>Coursework</dt><dd>Game AI, linear algebra, data structures, operating systems, physics, probability &amp; statistics</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="contact">
+    <div class="label">Contact</div>
+    <h2>Building an engine, a tool, or a team? Let's talk.</h2>
+    <div class="email-row">
+      <span class="email" id="email">ngylethan@gmail.com</span>
+      <button class="btn" id="copy" type="button">Copy email</button>
+    </div>
+    <div class="links" id="links"></div>
+  </section>
+
+  <footer class="mono">
+    <span>© 2026 Ethan</span>
+    <span>Hero render: 3D point cloud, drawn live on canvas</span>
+  </footer>
+</div>
+
+<script>
+// Add your profile URLs here; empty entries are hidden.
+const LINKS = [
+  { label: "GitHub", url: "" },
+  { label: "LinkedIn", url: "" },
+  { label: "Résumé (PDF)", url: "" }
+];
+const linksEl = document.getElementById("links");
+LINKS.filter(l => l.url).forEach(l => {
+  const a = document.createElement("a");
+  a.href = l.url; a.textContent = l.label + " ↗"; a.target = "_blank"; a.rel = "noopener";
+  a.className = "mono";
+  linksEl.appendChild(a);
+});
+
+document.getElementById("copy").addEventListener("click", async (e) => {
+  const text = document.getElementById("email").textContent;
+  try {
+    await navigator.clipboard.writeText(text);
+    e.target.textContent = "Copied";
+  } catch {
+    const r = document.createRange(); r.selectNodeContents(document.getElementById("email"));
+    const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    e.target.textContent = "Selected, press Ctrl+C";
+  }
+  setTimeout(() => (e.target.textContent = "Copy email"), 2000);
+});
+
+// Point-cloud viewport: a torus knot sampled as coloured points, depth-sorted and orbitable.
+(() => {
+  const canvas = document.getElementById("splat");
+  const vp = document.getElementById("viewport");
+  const ctx = canvas.getContext("2d");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const N = 9000;
+  const pts = new Float32Array(N * 3);
+  const col = [];
+  for (let i = 0; i < N; i++) {
+    const t = (i / N) * Math.PI * 2;
+    const p = 2, q = 3;
+    const r = 0.55 + 0.22 * Math.cos(q * t);
+    const cx = r * Math.cos(p * t), cy = r * Math.sin(p * t), cz = 0.22 * Math.sin(q * t);
+    // tube offset for volume
+    const a = Math.random() * Math.PI * 2, rad = 0.09 * Math.sqrt(Math.random());
+    pts[i*3] = cx + Math.cos(a) * rad;
+    pts[i*3+1] = cy + Math.sin(a) * rad * 0.9;
+    pts[i*3+2] = cz + Math.sin(a + 1.3) * rad;
+    const h = (t / (Math.PI * 2));
+    // blend cobalt → amber along the curve
+    const mix = 0.5 + 0.5 * Math.sin(h * Math.PI * 4);
+    col.push([47 + (240-47)*mix, 85 + (173-85)*mix, 230 + (74-230)*mix]);
+  }
+  document.getElementById("pts").textContent = N.toLocaleString();
+  let rotY = 0.6, rotX = -0.35, drag = null, W = 0, H = 0, dpr = 1;
+  const order = new Uint32Array(N), depth = new Float32Array(N), sx = new Float32Array(N), sy = new Float32Array(N);
+  for (let i = 0; i < N; i++) order[i] = i;
+
+  function resize() {
+    dpr = Math.min(devicePixelRatio || 1, 2);
+    W = vp.clientWidth; H = vp.clientHeight;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+  }
+  resize();
+  new ResizeObserver(resize).observe(vp);
+
+  vp.addEventListener("pointerdown", e => { drag = [e.clientX, e.clientY, rotY, rotX]; vp.setPointerCapture(e.pointerId); });
+  vp.addEventListener("pointermove", e => {
+    if (!drag) return;
+    rotY = drag[2] + (e.clientX - drag[0]) * 0.01;
+    rotX = Math.max(-1.4, Math.min(1.4, drag[3] + (e.clientY - drag[1]) * 0.01));
+    if (reduce) draw();
+  });
+  vp.addEventListener("pointerup", () => (drag = null));
+
+  const ft = document.getElementById("ft");
+  let ftAvg = 0, frame = 0;
+  function draw() {
+    const t0 = performance.now();
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    const cy = Math.cos(rotY), sy_ = Math.sin(rotY), cx = Math.cos(rotX), sx_ = Math.sin(rotX);
+    const scale = Math.min(W, H) * 0.62;
+    for (let i = 0; i < N; i++) {
+      const x = pts[i*3], y = pts[i*3+1], z = pts[i*3+2];
+      const x1 = x * cy + z * sy_, z1 = -x * sy_ + z * cy;
+      const y2 = y * cx - z1 * sx_, z2 = y * sx_ + z1 * cx;
+      const persp = 2.6 / (2.6 + z2);
+      sx[i] = W / 2 + x1 * scale * persp;
+      sy[i] = H / 2 + y2 * scale * persp;
+      depth[i] = z2;
+    }
+    order.sort((a, b) => depth[b] - depth[a]);
+    for (let k = 0; k < N; k++) {
+      const i = order[k];
+      const d = depth[i];
+      const shade = 0.45 + 0.55 * (1 - (d + 0.8) / 1.6);
+      const c = col[i];
+      ctx.fillStyle = `rgba(${c[0]*shade|0},${c[1]*shade|0},${c[2]*shade|0},0.85)`;
+      const s = 1.6 + (1 - d) * 0.9;
+      ctx.fillRect(sx[i] - s/2, sy[i] - s/2, s, s);
+    }
+    const dt = performance.now() - t0;
+    ftAvg = ftAvg * 0.9 + dt * 0.1;
+    if (++frame % 10 === 0) ft.textContent = ftAvg.toFixed(1);
+  }
+  function loop() {
+    if (!drag) rotY += 0.004;
+    draw();
+    requestAnimationFrame(loop);
+  }
+  if (reduce) draw(); else requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
